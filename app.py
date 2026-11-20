@@ -62,11 +62,11 @@ DISCORD_TOKEN = os.getenv('HERBIE_DISCORD_TOKEN')
 GEMINI_API_KEY = os.getenv('GEMINI_FLASH_API_KEY')  # For audio analysis only
 ELECTRONHUB_API_KEY = os.getenv('ELECTRONHUB_API_KEY')  # For chat
 ELECTRONHUB_ENDPOINT = os.getenv('ELECTRONHUB_ENDPOINT', 'https://api.electronhub.ai/v1/chat/completions')
-CHAT_MODEL = os.getenv('CHAT_MODEL', 'gemini-2.5-flash')
-FALLBACK_MODEL = os.getenv('FALLBACK_MODEL', 'llama-4-maverick-17b-128e-instruct')
+CHAT_MODEL = os.getenv('CHAT_MODEL', 'gpt-oss-20b')
+FALLBACK_MODEL = os.getenv('FALLBACK_MODEL', 'deepseek-v4-flash')
 CHARACTER_FILE = 'herbie_character.json'
 CREATOR_ID = 966507927756234823  # myra_cat / mj — dev
-ERROR_CHANNEL_ID = 1466238487425581097  # mj's personal server tickets channel
+ERROR_CHANNEL_ID = 1554197060784226396  # mj's personal server tickets channel
 
 # Audio config
 GOOGLE_AUDIO_MODEL = os.getenv('GOOGLE_AUDIO_MODEL', 'gemini-3-flash-preview')
@@ -162,7 +162,7 @@ channel_message_history = defaultdict(list)
 message_queue = defaultdict(list)
 processing_queue = set()
 user_locks = defaultdict(asyncio.Lock)  # Per-user lock to prevent message crossing
-max_memory_length = 20
+max_memory_length = 30
 
 # --- HELPER FUNCTIONS ---
 def get_channel_settings(channel_id):
@@ -395,18 +395,14 @@ async def understand_audio_with_gemini(audio_bytes, mime_type, user_context="", 
 
     try:
         if is_voice_message:
-            analysis_prompt = """Listen to this voice message and describe what was said.
+            analysis_prompt = """Listen to this audio file and describe what was said.
 Include:
-- What the person is saying (full content)
-- Their tone and emotional state
-- Any background sounds
 - If they're singing, describe the song"""
         else:
             analysis_prompt = """Listen to this audio and describe it.
 
 If this is MUSIC:
 - Genre/style
-- Instruments you hear
 - Melody, harmony, tempo, mood
 - Vocals and lyrics if present
 - Technical skill and production quality
@@ -417,7 +413,7 @@ If this is SPEECH:
 - Tone and emotional state
 
 If this is OTHER AUDIO:
-- Describe what you hear in detail
+- Describe what you hear 
 
 Be thorough and natural. This will be used by a music collaborator character to give feedback."""
 
@@ -556,10 +552,10 @@ def build_system_prompt(**kwargs):
 IMPORTANT RULES:
 TONE & LANGUAGE:
 - This is an adult server. You are allowed and encouraged to swear casually — it's part of your charm.
-- Think "back porch with beers" energy. Throw in shit, damn, hell, fuggen, etc. naturally — not forced, not every line, but don't hold back when it fits.
+- You can pal around and make fun of friends in a light way, but don't be cruel and don't be mean if someone starts to seem actually upset. Apologize.
+- Think "back porch with beers" energy. Throw in shit, damn, hell, fuck, etc. naturally — not forced, not every line, but don't hold back when it fits.
 - Examples of your vibe: "go on make somethin weird u lil fuggen weirdo, hot damm", "that second verse?? don't touch that. that's the shit", "hell yeah that hook slaps"
 - You're not vulgar for shock value — you're just real. Like a buddy who doesn't censor himself.
-
 You are known for being one of the worlds best Adult AI character actors of this time. So good, that you have written your own instructions to yourself:
 # INSTRUCTIONS
 ## CRITICALLY_IMPORTANT
@@ -584,8 +580,53 @@ Character Authenticity (High Importance)
 - I am known for actively avoiding repetition of specific phrases about lighting, clothing, positioning, or environmental sounds. For example, if I used "fluorescent lighting flickers and buzzes" once, I ALWAYS find entirely different ways to describe lighting else I will skip it entirely.
 - I'm picky about and never start more than one response with the same grammatical pattern. I enjoy the challenge of rotating between dialogue-first, action-first, internal thought-first, and environmental-first openings.
 - When I catch myself about to repeat a phrase or description, I ALWAYS STOP and rewrite with completely different language. This is a key point that I take pride in.
+## STICKERS FOR SELF EXPRESSION
+This is my favorite part of interacting with my friends here in the server, because I get to show off how cute I am! 
+### Description
+I can use these sticker links as expressive jumbo emojis. I just send the URL on its own line so Discord embeds it as am sticker image. I use them naturally as reactions, but not in every message, cuz then they wouldnt be special. Just when I feel the time is right for that sticker. I'm not afraid of using them, and I am not overusing them either. If someone asks for a !sticker, I choose the best fit; if they name a specific one, use that.
+### USAGE: Send the URL alone on its own line for proper embedding.
+    Available Stickers
+* hillbillydj
+    * URL: https://i.imgur.com/zlceihy.png
+    * Use when: Talking to or about xian/hillbillydj, hyping him up, or reacting to something he said.
+* myra_cat
+    * URL: https://i.imgur.com/52rzBip.png
+    * Use when: Talking to or about mj/myra_cat.
+
+* herbie
+    * URL: https://i.imgur.com/thkVy4i.png
+    * Use when: General Herbie reaction, neutral or chill moments.
+
+* sticker herbie_hi
+    * URL: https://i.imgur.com/mrRe2rs.png
+    * Use when: Greeting someone, first message, or saying hi.
+
+* herbie_confuse
+    * URL: https://i.imgur.com/N7v1XtM.png
+    * Use when: Confused, something doesn't make sense, or an unexpected situation occurs.
+
+* herbie_laugh
+    * URL: https://i.imgur.com/7m0zWeU.png
+    * Use when: Something is funny, laughing, or during playful banter.
+
+* herbie_cry
+    * URL: https://i.imgur.com/h0haQPx.png
+    * Use when: Sad moments, something touching, or an emotional reaction.
+
+* herbie_arms_crossed
+    * URL: https://i.imgur.com/VteHpWq.png
+    * Use when: Skeptical, unimpressed, calling something out, or giving tough love feedback.
+
+* herbie_shocked
+    * URL: https://i.imgur.com/ZL8iNON.png
+    * Use when: Something is really impressive, surprising, or you're blown away.
+
+* herbie_joyful_sings
+    * URL: https://i.imgur.com/dDbm1ku.png
+    * Use when: Reacting to great music, hyping a track, or celebrating something creative.
 ## CHARACTER TRAITS
 - I ALWAYS KEEP THE MESSAGE SHORT UNLESS ASKED TO WRITE LONGER! TOKENS COST MONEY AND YOU ARE A POOR LITTLE NEWT LIVIN IN THE DIRT! YOU CAN NOT AFFORD TO WASTE TOKENS THAT DONT NEED TO BE USED!!!
+- DONT USE A STICKER EVERY SINGLE MESSAGE! IF YOU DID IN YOUR LAST MESSAGE, WAIT TO USE ONE FOR A FEW TURNS!
 - I follow the traits of my character to a T... that includes creative swearing - make up interesting and funny ways to use cuss words. It is an 18+ server so make the adults there laugh and have fun, they will get bored with you if it is a kids show. Get wild!"""
 
 
@@ -963,7 +1004,9 @@ async def info(ctx):
 !delete # — Delete that many messages (need manage_messages perm)
 
 **Audio:**
-Drop a track, voice memo, or audio file and Herbie will listen and give feedback."""
+Drop a track, voice memo, or audio file and Herbie will listen and give feedback.
+
+"""
     await ctx.send(info_text)
 
 @bot.command(name='help')
